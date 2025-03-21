@@ -1,0 +1,35 @@
+{
+  "name": "convertpro-theme",
+  "version": "1.0.0",
+  "description": "An advanced, mobile-first Shopify theme based on Dawn, using Tailwind CSS and Baymard best practices.",
+  "scripts": {
+    "build:css": "tailwindcss -i ./assets/css/tailwind.css -o ./assets/styles.css",
+    "watch:css": "tailwindcss -i ./assets/css/tailwind.css -o ./assets/styles.css --watch",
+    "build": "npm run build:css",
+    "dev": "npm-run-all --parallel watch:css theme:watch",
+    "theme:watch": "theme watch",
+    "theme:open": "theme open",
+    "theme:deploy": "theme deploy"
+  },
+  "keywords": [
+    "shopify",
+    "theme",
+    "tailwind",
+    "tailwindcss",
+    "dawn",
+    "ecommerce",
+    "baymard"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^7.0.2",
+    "@tailwindcss/typography": "^0.5.16",
+    "autoprefixer": "^10.4.20",
+    "cssnano": "^7.0.6",
+    "postcss": "^8.5.3",
+    "swiper": "^11.2.6",
+    "tailwindcss": "^4.0.7",
+    "zooming": "^2.1.1"
+  }
+}

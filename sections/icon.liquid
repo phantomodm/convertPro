@@ -1,0 +1,29 @@
+{% comment %} snippets/icon.liquid {% endcomment %}
+{%- case icon_name -%}
+  {%- when 'arrow' -%}
+    <svg
+      width="12"
+      height="7"
+      viewBox="0 0 12 7"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      class="{{ class_name }}"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M11.707 1.707a1 1 0 010 1.414L7.414 7.414a1 1 0 01-1.414 0L1.707 3.121a1 1 0 010-1.414l4.293-4.293a1 1 0 011.414 0l4.293 4.293z" fill="currentColor"/>
+    </svg>
+
+  {%- when 'caret' -%}
+    <svg
+      class="{{ class_name }}"
+      aria-hidden="true"
+      focusable="false"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 11 11"
+    >
+      <path d="M5.5 8.37l4.19-4.18a.52.52 0 000-.74.52.52 0 00-.74 0L5.5 6.88 1.81 3.2A.52.52 0 001.07 3.2a.52.52 0 000 .74L5.5 8.37z" fill="currentColor"/>
+    </svg>
+  {%- else -%}
+    <span style="color:red">ICON NOT FOUND: {{ icon_name }}</span>
+{%- endcase -%}

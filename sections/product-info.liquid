@@ -1,0 +1,138 @@
+{% comment %} sections/product-information.liquid {% endcomment %}
+{% assign current_variant = product.selected_or_first_available_variant %}
+<div class="tw-product-information tw-{{ section.settings.color_scheme }}">
+  <h1 class="tw-text-3xl tw-font-bold tw-font-header tw-mb-2">{{ product.title | escape }}</h1>
+
+  <div class="tw-flex tw-items-center tw-mb-4">
+    {%- if current_variant.compare_at_price > current_variant.price -%}
+      <span class="tw-text-red-500 tw-font-bold tw-mr-2">{{ current_variant.compare_at_price | money }}</span>
+      <span class="tw-line-through tw-text-sm tw-text-gray-500">{{ current_variant.price | money }}</span>
+    {%- else -%}
+      <span class="tw-text-gray-900 tw-text-xl tw-font-medium">{{ current_variant.price | money }}</span>
+    {%- endif -%}
+  </div>
+
+  <product-form class="tw-product-form" data-product-id="{{ product.id }}" data-url="{{ product.url }}">
+    {% form 'product', product, class: 'tw-product-form' %}
+      <input type="hidden" name="id" value="{{ current_variant.id }}">
+
+      {% unless product.has_only_default_variant %}
+        <div class="product-form__variants">
+          {% for option in product.options_with_values %}
+            <div class="tw-mb-4">
+              <label
+                class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-1"
+                for="option-{{ forloop.index0 }}-{{ section.id }}"
+              >
+                {{ option.name | escape }}
+              </label>
+              <select
+                id="option-{{ forloop.index0 }}-{{ section.id }}"
+                name="options[{{ option.name | escape }}]"
+                class="tw-w-full tw-border tw-border-gray-300 tw-rounded-md tw-py-2 tw-px-3 tw-text-base tw-leading-tight focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500"
+              >
+                {% for value in option.values %}
+                  <option
+                    value="{{ value | escape }}"
+                    {% if option.selected_value == value %}
+                      selected
+                    {% endif %}
+                  >
+                    {{ value | escape }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endfor %}
+        </div>
+      {% endunless %}
+
+      <div class="tw-mb-4">
+        <label for="quantity-{{ section.id }}" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-1"
+          >Quantity</label
+        >
+        <input
+          type="number"
+          id="quantity-{{ section.id }}"
+          name="quantity"
+          value="1"
+          min="1"
+          class="tw-w-20 tw-border tw-border-gray-300 tw-rounded-md tw-py-2 tw-px-3 tw-text-base tw-leading-tight focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500"
+        >
+      </div>
+
+      <button
+        type="submit"
+        name="add"
+        class="tw-w-full tw-bg-button tw-text-button-label tw-py-3 tw-px-6 tw-rounded-button tw-text-base tw-font-medium hover:tw-opacity-75 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-button"
+        {% if current_variant.available == false %}
+          disabled
+        {% endif %}
+      >
+        {% if current_variant.available %}
+          {{ 'products.product.add_to_cart' | t }}
+        {% else %}
+          {{ 'products.product.sold_out' | t }}
+        {% endif %}
+      </button>
+
+      <div class="tw-mt-4 tw-prose tw-prose-sm">
+        {{ product.description }}
+      </div>
+    {% endform %}
+  </product-form>
+</div>
+
+{% comment %}JSON for Variant Data{% endcomment %}
+<script type="application/json">
+  {{ product.variants | json }}
+</script>
+
+{% assign color_scheme_options = '[' %}
+{% for i in (1..settings.color_schemes.definition.size) %}
+  {% assign option_string = '{ "value": "scheme-'
+    | append: i
+    | append: '", "label": "t:settings_schema.colors.settings.color_schemes.options.scheme_'
+    | append: i
+    | append: '.label" }'
+  %}
+  {% assign color_scheme_options = color_scheme_options | append: option_string %}
+  {% unless forloop.last %}
+    {% assign color_scheme_options = color_scheme_options | append: ',' %}
+  {% endunless %}
+{% endfor %}
+{% assign color_scheme_options = '[' | append: color_scheme_options | append: ']' | split: ',' %}
+
+{% schema %}
+{
+  "name": "Product Information",
+  "tag": "section",
+  "class": "product-information",
+  "settings": [
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1",
+      "options": [
+        {
+          "value": "scheme-1",
+          "label": "t:settings_schema.colors.settings.color_schemes.options.scheme_1.label"
+        },
+        {
+          "value": "scheme-2",
+          "label": "t:settings_schema.colors.settings.color_schemes.options.scheme_2.label"
+        },
+        {
+          "value": "scheme-3",
+          "label": "t:settings_schema.colors.settings.color_schemes.options.scheme_3.label"
+        },
+        {
+          "value": "scheme-4",
+          "label": "t:settings_schema.colors.settings.color_schemes.options.scheme_4.label"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

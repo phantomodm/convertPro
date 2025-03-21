@@ -1,0 +1,247 @@
+{% comment %} sections/hero-banner.liquid {% endcomment %}
+
+<div class="tw-{{ section.settings.color_scheme }}{% if section.settings.full_width %} tw-w-full{% else %} tw-container tw-mx-auto{% endif %}">
+  <div class="tw-relative">
+    {%- if section.settings.image != blank -%}
+      <img
+        src="{{ section.settings.image | image_url: width: 2048 }}"
+        alt="{{ section.settings.image.alt | default: section.settings.heading | escape }}"
+        class="tw-w-full tw-h-auto {% if section.settings.image_height == 'adapt' %}tw-object-cover{% else %}tw-object-contain{% endif %}"
+        style="height: {{ section.settings.image_height }};"
+        width="{{ section.settings.image.width }}"
+        height="{{ section.settings.image.height }}"
+        loading="lazy"
+      >
+    {%- else -%}
+      <div class="tw-w-full tw-h-96 tw-bg-gray-200"></div>
+      {%- comment %} Placeholder if no image is selected {%- endcomment %}
+    {%- endif -%}
+
+    <div class="tw-absolute tw-inset-0 tw-flex tw-items-{{ section.settings.vertical_alignment }} tw-justify-{{ section.settings.horizontal_alignment }} tw-px-4 {% if section.settings.enable_overlay %}tw-bg-black tw-bg-opacity-{{ section.settings.overlay_opacity }}{% endif %}">
+      <div class="tw-text-center {% if section.settings.full_width %}tw-w-full{% else %}tw-max-w-3xl{% endif %}">
+        {%- if section.settings.heading != blank -%}
+          <h1 class="tw-text-4xl md:tw-text-5xl lg:tw-text-6xl tw-font-bold tw-font-header tw-mb-4 tw-{{ section.settings.text_color }}">
+            {{ section.settings.heading | escape }}
+          </h1>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="tw-text-lg md:tw-text-xl tw-mb-8 tw-{{ section.settings.text_color }}">
+            {{ section.settings.subheading | escape }}
+          </p>
+        {%- endif -%}
+        {%- if section.settings.button_label != blank -%}
+          <a
+            href="{{ section.settings.button_link }}"
+            class="tw-inline-block tw-bg-{{ section.settings.button_color }} tw-text-{{ section.settings.button_text_color }} tw-px-8 tw-py-3 tw-rounded-button tw-no-underline hover:tw-opacity-75"
+          >
+            {{ section.settings.button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Hero Banner",
+  "tag": "section",
+  "class": "hero-banner",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_height",
+      "label": "Image Height",
+      "default": "500px",
+      "options": [
+        { "value": "300px", "label": "300px" },
+        { "value": "400px", "label": "400px" },
+        { "value": "500px", "label": "500px" },
+        { "value": "600px", "label": "600px" },
+        { "value": "700px", "label": "700px" },
+        { "value": "800px", "label": "800px" },
+        { "value": "adapt", "label": "Adapt to Image" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "default": "Welcome to Our Store",
+      "label": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "default": "Shop our latest collection",
+      "label": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "default": "Shop Now",
+      "label": "Button Label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": false,
+      "label": "Full Width"
+    },
+    {
+      "type": "select",
+      "id": "horizontal_alignment",
+      "default": "center",
+      "label": "Horizontal Alignment",
+      "options": [
+        {
+          "value": "start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "end",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "vertical_alignment",
+      "default": "center",
+      "label": "Vertical Alignment",
+      "options": [
+        {
+          "value": "start",
+          "label": "Top"
+        },
+        {
+          "value": "center",
+          "label": "Middle"
+        },
+        {
+          "value": "end",
+          "label": "Bottom"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_overlay",
+      "default": false,
+      "label": "Enable Overlay"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "default": 50,
+      "label": "Overlay Opacity",
+      "info": "Only applies if 'Enable Overlay' is checked."
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1",
+      "options": [
+        {
+          "value": "scheme-1",
+          "label": "t:settings_schema.colors.settings.color_schemes.options.scheme_1.label"
+        },
+        {
+          "value": "scheme-2",
+          "label": "t:settings_schema.colors.settings.color_schemes.options.scheme_2.label"
+        },
+        {
+          "value": "scheme-3",
+          "label": "t:settings_schema.colors.settings.color_schemes.options.scheme_3.label"
+        },
+        {
+          "value": "scheme-4",
+          "label": "t:settings_schema.colors.settings.color_schemes.options.scheme_4.label"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "tw-text-text",
+      "options": [
+        {
+          "value": "tw-text-text",
+          "label": "Default"
+        },
+        {
+          "value": "tw-text-white",
+          "label": "White"
+        },
+        {
+          "value": "tw-text-black",
+          "label": "Black"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_color",
+      "label": "Button Background Color",
+      "default": "button",
+      "options": [
+        {
+          "value": "button",
+          "label": "Default"
+        },
+        {
+          "value": "white",
+          "label": "White"
+        },
+        {
+          "value": "black",
+          "label": "Black"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "button-label",
+      "options": [
+        {
+          "value": "button-label",
+          "label": "Default"
+        },
+        {
+          "value": "white",
+          "label": "White"
+        },
+        {
+          "value": "black",
+          "label": "Black"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner"
+    }
+  ]
+}
+{% endschema %}

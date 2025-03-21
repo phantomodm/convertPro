@@ -1,0 +1,152 @@
+{% comment %} templates/collection.liquid {% endcomment %}
+
+<div class="tw-container tw-mx-auto tw-py-8">
+  <h1 class="tw-text-3xl tw-font-bold tw-mb-6">{{ collection.title }}</h1>
+
+  <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-4">
+    <div class="md:tw-col-span-1">
+      {% comment %} Filters {% endcomment %}
+      <div class="tw-mb-4">
+        <h2 class="tw-text-lg tw-font-semibold tw-mb-2">Filters</h2>
+        <div class="tw-border tw-p-4">
+          <div class="tw-mb-2">
+            <label for="filter-by-type" class="tw-block tw-font-medium">Product Type:</label>
+            <select
+              id="filter-by-type"
+              class="tw-mt-1 tw-block tw-w-full tw-py-2 tw-px-3 tw-border tw-border-gray-300 tw-bg-white tw-rounded-md focus:tw-outline-none focus:tw-ring-indigo-500 focus:tw-border-indigo-500 sm:tw-text-sm"
+              data-filter="type"
+            >
+              <option value="all">All Types</option>
+              {% for product_type in collection.all_types %}
+                {%- if product_type != blank -%}
+                  <option value="{{ product_type | handleize }}">{{ product_type }}</option>
+                {%- endif -%}
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="tw-border tw-p-4">
+          <div class="tw-mb-2">
+            <label for="filter-by-tag" class="tw-block tw-font-medium">Filter by Tag:</label>
+            <select
+              id="filter-by-tag"
+              class="tw-mt-1 tw-block tw-w-full tw-py-2 tw-px-3 tw-border tw-border-gray-300 tw-bg-white tw-rounded-md focus:tw-outline-none focus:tw-ring-indigo-500 focus:tw-border-indigo-500 sm:tw-text-sm"
+              data-filter="tag"
+            >
+              <option value="all">All Tags</option>
+              {% for tag in collection.all_tags %}
+                <option value="{{ tag | handleize }}">{{ tag }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% comment %} Add more filter options here (e.g., price range, vendor, custom metafields) {% endcomment %}
+        {% comment %} Example Price Filter (Requires JavaScript changes too!) {% endcomment %}
+        <div class="tw-mb-2">
+          <label for="filter-by-price" class="tw-block tw-font-medium">Price:</label>
+          <select
+            id="filter-by-price"
+            class="tw-mt-1 tw-block tw-w-full tw-py-2 tw-px-3 tw-border tw-bg-white tw-rounded-md focus:tw-outline-none focus:tw-ring-indigo-500 focus:tw-border-indigo-500 sm:tw-text-sm"
+            data-filter="price"
+          >
+            <option value="all">All Prices</option>
+            <option value="0-50">Under $50</option>
+            <option value="50-100">$50 - $100</option>
+            <option value="100-200">$100 - $200</option>
+            <option value="200-max">Over $200</option>
+          </select>
+        </div>
+      </div>
+
+      {% comment %} Sorting {% endcomment %}
+      <div>
+        <h2 class="tw-text-lg tw-font-semibold tw-mb-2">Sort By</h2>
+        <select
+          id="sort-by"
+          class="tw-w-full tw-py-2 tw-px-3 tw-border tw-border-gray-300 tw-bg-white tw-rounded-md focus:tw-outline-none focus:tw-ring-indigo-500 focus:tw-border-indigo-500 sm:tw-text-sm"
+          data-sort
+        >
+          <option
+            value="manual"
+            {% if collection.sort_by == 'manual' or collection.sort_by == blank %}
+              selected
+            {% endif %}
+          >
+            Featured
+          </option>
+          <option
+            value="best-selling"
+            {% if collection.sort_by == 'best-selling' %}
+              selected
+            {% endif %}
+          >
+            Best Selling
+          </option>
+          <option
+            value="title-ascending"
+            {% if collection.sort_by == 'title-ascending' %}
+              selected
+            {% endif %}
+          >
+            Alphabetically, A-Z
+          </option>
+          <option
+            value="title-descending"
+            {% if collection.sort_by == 'title-descending' %}
+              selected
+            {% endif %}
+          >
+            Alphabetically, Z-A
+          </option>
+          <option
+            value="price-ascending"
+            {% if collection.sort_by == 'price-ascending' %}
+              selected
+            {% endif %}
+          >
+            Price, low to high
+          </option>
+          <option
+            value="price-descending"
+            {% if collection.sort_by == 'price-descending' %}
+              selected
+            {% endif %}
+          >
+            Price, high to low
+          </option>
+          <option
+            value="created-ascending"
+            {% if collection.sort_by == 'created-ascending' %}
+              selected
+            {% endif %}
+          >
+            Date, old to new
+          </option>
+          <option
+            value="created-descending"
+            {% if collection.sort_by == 'created-descending' %}
+              selected
+            {% endif %}
+          >
+            Date, new to old
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="md:tw-col-span-2">
+      {% comment %} Product Grid (Now rendered via a section) {% endcomment %}
+      {% paginate collection.products by 12 %}
+        {% section 'collection-grid' %}
+      {% endpaginate %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Collection Page",
+  "tag": "section",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,95 @@
+{% comment %} sections/product-media.liquid {% endcomment %}
+
+<div class="tw-product-media">
+  {% if product.media.size > 0 %}
+    <div class="tw-product-media__main">
+      <div class="swiper-wrapper">
+        {% for media in product.media %}
+          <div class="swiper-slide">
+            {% case media.media_type %}
+              {% when 'image' %}
+                <product-gallery>
+                  <img
+                    src="{{ media | image_url: width: 1024 }}"
+                    alt="{{ media.alt | default: product.title | escape }}"
+                    class="tw-w-full tw-h-auto"
+                    width="{{ media.width }}"
+                    height="{{ media.height }}"
+                    loading="lazy"
+                  >
+                </product-gallery>
+              {% when 'video' %}
+                <product-gallery>
+                  <div
+                    class="tw-relative"
+                    style="padding-bottom: {{ 1 | divided_by: media.aspect_ratio | times: 100 }}%;"
+                  >
+                    {{ media | video_tag: class: 'tw-absolute tw-inset-0 tw-w-full tw-h-full', image_size: '1024x' }}
+                  </div>
+                </product-gallery>
+
+              {% when 'external_video' %}
+                <product-gallery>
+                  <div
+                    class="tw-relative"
+                    style="padding-bottom: {{ 1 | divided_by: media.aspect_ratio | times: 100 }}%;"
+                  >
+                    {{ media | external_video_tag: class: 'tw-absolute tw-inset-0 tw-w-full tw-h-full' }}
+                  </div>
+                </product-gallery>
+              {% when 'model' %}
+                <div
+                  class="tw-relative"
+                  style="padding-bottom: {{ 1 | divided_by: media.aspect_ratio | times: 100 }}%;"
+                >
+                  {{ media | model_viewer_tag: class: 'tw-absolute tw-inset-0 tw-w-full tw-h-full' }}
+                </div>
+              {% else %}
+                <product-gallery>
+                  {{ media | media_tag }}
+                </product-gallery>
+            {% endcase %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+    </div>
+    {% if product.media.size > 1 %}
+      <div class="tw-product-media__thumbs tw-mt-4 tw-grid tw-grid-cols-4 tw-gap-2">
+        <div class="swiper-wrapper">
+          {% for media in product.media %}
+            <div class="swiper-slide">
+              <button type="button" class="tw-aspect-w-1 tw-aspect-h-1 tw-overflow-hidden">
+                <img
+                  src="{{ media | image_url: width: 200 }}"
+                  alt="{{ media.alt | default: product.title | escape }}"
+                  class="tw-w-full tw-h-full tw-object-center tw-object-cover"
+                  loading="lazy"
+                  width="200"
+                  height="200"
+                >
+              </button>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  {% else %}
+    {{ 'product-1' | placeholder_svg_tag: 'tw-w-full tw-h-auto tw-object-cover tw-bg-gray-200' }}
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Product Media",
+  "tag": "section",
+  "class": "product-media",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Add product images/videos here"
+    }
+  ]
+}
+{% endschema %}

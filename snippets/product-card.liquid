@@ -1,0 +1,64 @@
+{% comment %} snippets/product-card.liquid {% endcomment %}
+<div
+  class="tw-product-card"
+  data-product-type="{{ product.type | handleize }}"
+  data-product-tags="{{ product.tags | join: ' ' | handleize }}"
+  data-product-price="{{ product.price | money_without_currency | remove: ',' }}"
+  data-created-at="{{ product.created_at | date:'%Y-%m-%d' }}"
+>
+  <a href="{{ product.url | within: collection }}" class="tw-block">
+    <div class="tw-relative tw-w-full tw-overflow-hidden {% if product.featured_image %}tw-aspect-w-1 tw-aspect-h-1{% endif %}">
+      {% if product.featured_image %}
+        <img
+          src="{{ product.featured_image | image_url: width: 500 }}"
+          alt="{{ product.featured_image.alt | default: product.title | escape }}"
+          class="tw-w-full tw-h-full tw-object-center tw-object-cover tw-transition-opacity tw-duration-300 group-hover:tw-opacity-75"
+          loading="lazy"
+          width="{{ product.featured_image.width }}"
+          height="{{ product.featured_image.height }}"
+        >
+      {% else %}
+        {{ 'product-1' | placeholder_svg_tag: 'tw-w-full tw-h-full tw-object-center tw-object-cover tw-bg-gray-200' }}
+      {% endif %}
+      {%- if product.compare_at_price > product.price -%}
+        <div class="tw-absolute tw-top-2 tw-left-2 tw-bg-red-500 tw-text-white tw-text-xs tw-font-bold tw-px-2 tw-py-1 tw-rounded">
+          {{ 'products.product.on_sale' | t }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="tw-mt-4">
+      <h3 class="tw-text-lg tw-font-medium tw-text-gray-900">
+        {{ product.title | escape }}
+      </h3>
+
+      <div class="tw-flex tw-items-center tw-mt-1">
+        {%- if product.compare_at_price > product.price -%}
+          <span class="tw-text-red-500 tw-font-bold tw-mr-2">{{ product.compare_at_price | money }}</span>
+          <span class="tw-line-through tw-text-sm tw-text-gray-500">{{ product.price | money }}</span>
+        {%- else -%}
+          <span class="tw-text-gray-900">{{ product.price | money }}</span>
+        {%- endif -%}
+      </div>
+    </div>
+  </a>
+
+  {% comment %} Quick Add Button {% endcomment %}
+  <div class="tw-mt-4">
+    <button
+      type="button"
+      class="tw-w-full tw-bg-button tw-text-button-label tw-py-2 tw-px-4 tw-rounded-button tw-border tw-border-transparent tw-text-base tw-font-medium hover:tw-opacity-75 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-button quick-add-button"
+      data-product-id="{{ product.id }}"
+      data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+      {% if product.available == false %}
+        disabled
+      {% endif %}
+    >
+      {% if product.available %}
+        {{ 'products.product.add_to_cart' | t }}
+      {% else %}
+        {{ 'products.product.sold_out' | t }}
+      {% endif %}
+    </button>
+  </div>
+</div>

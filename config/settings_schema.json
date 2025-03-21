@@ -1,11 +1,11 @@
 [
   {
     "name": "theme_info",
-    "theme_name": "Dawn",
-    "theme_version": "15.3.0",
-    "theme_author": "Shopify",
-    "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
-    "theme_support_url": "https://support.shopify.com/"
+    "theme_name": "ConvertPro",
+    "theme_version": "1.0.0",
+    "theme_author": "Your Name (or Company)",
+    "theme_documentation_url": "https://your-documentation-url.com",
+    "theme_support_url": "https://your-support-url.com"
   },
   {
     "name": "t:settings_schema.logo.name",

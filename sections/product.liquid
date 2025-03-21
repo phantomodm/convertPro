@@ -1,0 +1,15 @@
+{% comment %} templates/product.liquid {% endcomment %}
+
+<div class="tw-container tw-mx-auto tw-px-4 tw-py-8">
+  <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-8">
+    <div>
+      {% section 'product-media' %}
+    </div>
+    <div>
+      {% section 'product-information' %}
+    </div>
+  </div>
+  {% section 'product-reviews' %}
+  {% section 'product-recommendations' %}
+  {% section 'product-trust-badges' %}
+</div>

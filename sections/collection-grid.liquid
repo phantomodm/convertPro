@@ -1,0 +1,58 @@
+{% comment %} sections/collection-grid.liquid {% endcomment %}
+
+<div class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-4" id="product-grid">
+  {% for product in collection.products %}
+    {% render 'product-card', product: product %}
+  {% else %}
+    <p class="tw-col-span-full tw-text-center">No products found in this collection.</p>
+  {% endfor %}
+</div>
+
+{%- if paginate.pages > 1 -%}
+  <div class="tw-pagination tw-flex tw-justify-center tw-items-center tw-mt-8">
+    {% if paginate.previous %}
+      <a
+        href="{{ paginate.previous.url }}"
+        class="tw-pagination-prev tw-px-4 tw-py-2 tw-mr-2 tw-border tw-border-gray-300 tw-bg-white tw-text-gray-700 tw-rounded-md hover:tw-bg-gray-100"
+      >
+        <span aria-hidden="true">&laquo;</span> Previous
+      </a>
+    {% endif %}
+
+    {% for part in paginate.parts %}
+      {% if part.is_link %}
+        <a
+          href="{{ part.url }}"
+          class="tw-pagination-number tw-px-4 tw-py-2 tw-mx-1 tw-border tw-border-gray-300 tw-bg-white tw-text-gray-700 tw-rounded-md hover:tw-bg-gray-100"
+        >
+          {{ part.title }}
+        </a>
+      {% else %}
+        {% if part.title == paginate.current_page %}
+          <span class="tw-pagination-current tw-px-4 tw-py-2 tw-mx-1 tw-border tw-border-gray-300 tw-bg-gray-800 tw-text-white tw-rounded-md">
+            {{ part.title }}
+          </span>
+        {% else %}
+          <span class="tw-pagination-ellipsis tw-px-4 tw-py-2 tw-mx-1 tw-text-gray-700">
+            {{ part.title }}
+          </span>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if paginate.next %}
+      <a
+        href="{{ paginate.next.url }}"
+        class="tw-pagination-next tw-px-4 tw-py-2 tw-ml-2 tw-border tw-border-gray-300 tw-bg-white tw-text-gray-700 tw-rounded-md hover:tw-bg-gray-100"
+      >
+        Next <span aria-hidden="true">&raquo;</span>
+      </a>
+    {% endif %}
+  </div>
+{%- endif -%}
+{% schema %}
+{
+  "name": "Collection Grid",
+  "tag": "section",
+  "settings": []
+}
+{% endschema %}
