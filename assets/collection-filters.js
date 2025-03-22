@@ -7,25 +7,46 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!productGrid) return;
   // Function to update the product grid with AJAX
   const updateProductGrid = (url) => {
-    fetch(`${url}${url.indexOf('?') === -1 ? '?' : '&'}section_id=${productGrid.dataset.sectionId}`) //Add the section ID
+    document.getElementById('loading-spinner').classList.remove('tw-hidden');
+    window.theme
+      .fetch(`${url}${url.indexOf('?') === -1 ? '?' : '&'}section_id=${productGrid.dataset.sectionId}`) //Add the section ID
       .then((response) => response.text())
       .then((responseText) => {
-        const parser = new DOMParser();
-        const newDocument = parser.parseFromString(responseText, 'text/html');
-        const newGrid = newDocument.getElementById('product-grid').innerHTML;
-        const newPagination = newDocument.querySelector('.tw-pagination'); //Get the whole pagination
+        const html = new DOMParser().parseFromString(responseText, 'text/html');
+        const newGrid = html.getElementById('product-grid');
+        const productGrid = document.getElementById('product-grid');
+        productGrid.innerHTML = newGrid.innerHTML;
 
-        productGrid.innerHTML = newGrid;
-        // Update pagination separately
-        const currentPagination = document.querySelector('.tw-pagination');
-        if (currentPagination && newPagination) {
-          currentPagination.innerHTML = newPagination.innerHTML;
-        } else if (newPagination) {
-          //If it is not pagination, but one is returned, add to DOM.
-          productGrid.insertAdjacentElement('afterend', newPagination);
-        } else if (currentPagination) {
-          currentPagination.remove(); //If there isn't pagination returned, remove it
+        //Update pagination
+        const newPagination = html.querySelector('.pagination'); //Select pagination element
+        const existingPagination = document.querySelector('.pagination');
+
+        if (newPagination && existingPagination) {
+          existingPagination.innerHTML = newPagination.innerHTML; // Replace content if both exists
+        } else if (!newPagination && existingPagination) {
+          existingPagination.remove(); // Remove if no new
+        } else if (newPagination && !existingPagination) {
+          productGrid.parentNode.insertBefore(newPagination, productGrid.nextSibling); //Insert if new pagination, and it doesn't already exist.
         }
+
+        // const parser = new DOMParser();
+        // const newDocument = parser.parseFromString(responseText, 'text/html');
+        // const newGrid = newDocument.getElementById('product-grid').innerHTML;
+        // const newPagination = newDocument.querySelector('.tw-pagination'); //Get the whole pagination
+
+        // productGrid.innerHTML = newGrid;
+        // // Update pagination separately
+        // const currentPagination = document.querySelector('.tw-pagination');
+        // if (currentPagination && newPagination) {
+        //   currentPagination.innerHTML = newPagination.innerHTML;
+        // } else if (newPagination) {
+        //   //If it is not pagination, but one is returned, add to DOM.
+        //   productGrid.insertAdjacentElement('afterend', newPagination);
+        // } else if (currentPagination) {
+        //   currentPagination.remove(); //If there isn't pagination returned, remove it
+        // }
+
+        document.getElementById('loading-spinner').classList.add('tw-hidden');
 
         // Re-attach event listeners (because the DOM elements have been replaced)
         addFilterEventListeners();
@@ -35,6 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch((error) => {
         console.error('Error fetching product data:', error);
+        const errorMessageContainer = document.getElementById('collection-error-message');
+        errorMessageContainer.textContent = 'Error loading products. Please try again.'; // Or use a translation key
+        errorMessageContainer.classList.remove('tw-hidden');
+        // HIDE SPINNER ON ERROR
+        document.getElementById('loading-spinner').classList.add('tw-hidden');
       });
   };
 

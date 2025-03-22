@@ -54,11 +54,21 @@
         disabled
       {% endif %}
     >
-      {% if product.available %}
-        {{ 'products.product.add_to_cart' | t }}
-      {% else %}
-        {{ 'products.product.sold_out' | t }}
-      {% endif %}
+      <span class="default-text">
+        {% if product.available %}
+          {{ 'products.product.add_to_cart' | t }}
+        {% else %}
+          {{ 'products.product.sold_out' | t }}
+        {% endif %}
+      </span>
+      <span class="loading-text tw-hidden">
+        <span
+          class="tw-animate-spin tw-inline-block tw-w-4 tw-h-4 tw-border-t-2 tw-border-b-2 tw-border-current tw-rounded-full"
+          role="status"
+          aria-label="Loading"
+        ></span>
+        <span class="tw-sr-only">{{ 'products.product.adding' | t }}</span>
+      </span>
     </button>
   </div>
 </div>

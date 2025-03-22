@@ -137,7 +137,7 @@
     <div class="md:tw-col-span-2">
       {% comment %} Product Grid (Now rendered via a section) {% endcomment %}
       {% paginate collection.products by 12 %}
-        {% section 'collection-grid' %}
+        {% section 'collection-grid' paginate: paginate %}
       {% endpaginate %}
     </div>
   </div>

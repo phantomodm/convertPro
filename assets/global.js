@@ -84,6 +84,45 @@ document.querySelectorAll('[id^="Details-"] summary').forEach((summary) => {
   summary.parentElement.addEventListener('keyup', onKeyUpEscape);
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  const spinner = document.getElementById('global-loading-spinner');
+
+  // Show spinner before any AJAX request
+  document.addEventListener('ajax:beforeSend', () => {
+    if (spinner) spinner.classList.remove('tw-hidden');
+  });
+
+  // Hide spinner after any AJAX request completes (success or error)
+  document.addEventListener('ajax:complete', () => {
+    if (spinner) spinner.classList.add('tw-hidden');
+  });
+
+  //Specific error catch.
+  document.addEventListener('ajax:error', () => {
+    if (spinner) spinner.classList.add('tw-hidden'); //Hide spinner
+  });
+});
+
+// Add a function to centralize fetch calls
+window.theme = window.theme || {}; //Namespace
+window.theme.fetch = async function shopifyFetch(url, options, parse = 'json') {
+  options = options || {}; //Avoid error is options is blank
+  return fetch(url, options)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      if (parse === 'json') return response.json(); //Parse JSON
+      if (parse === 'text') return response.text(); //Parse TEXT
+      return response; //Return the whole thing.
+    })
+    .catch((error) => {
+      console.error('Fetch error:', error);
+      // You could show a global error message here, too.
+      throw error; // Re-throw the error so calling functions can handle it
+    });
+};
+
 const trapFocusHandlers = {};
 
 function trapFocus(container, elementToFocus = container) {
@@ -286,7 +325,6 @@ function debounce(fn, wait) {
     t = setTimeout(() => fn.apply(this, args), wait);
   };
 }
-
 
 function throttle(fn, delay) {
   let lastCall = 0;
@@ -1282,51 +1320,39 @@ if (!customElements.get('bulk-add')) {
 }
 
 class CartPerformance {
-  static #metric_prefix = "cart-performance"
+  static #metric_prefix = 'cart-performance';
 
   static createStartingMarker(benchmarkName) {
-    const metricName = `${CartPerformance.#metric_prefix}:${benchmarkName}`
+    const metricName = `${CartPerformance.#metric_prefix}:${benchmarkName}`;
     return performance.mark(`${metricName}:start`);
   }
 
   static measureFromEvent(benchmarkName, event) {
-    const metricName = `${CartPerformance.#metric_prefix}:${benchmarkName}`
+    const metricName = `${CartPerformance.#metric_prefix}:${benchmarkName}`;
     const startMarker = performance.mark(`${metricName}:start`, {
-      startTime: event.timeStamp
+      startTime: event.timeStamp,
     });
 
     const endMarker = performance.mark(`${metricName}:end`);
 
-    performance.measure(
-      metricName,
-      `${metricName}:start`,
-      `${metricName}:end`
-    );
+    performance.measure(metricName, `${metricName}:start`, `${metricName}:end`);
   }
 
   static measureFromMarker(benchmarkName, startMarker) {
-    const metricName = `${CartPerformance.#metric_prefix}:${benchmarkName}`
+    const metricName = `${CartPerformance.#metric_prefix}:${benchmarkName}`;
     const endMarker = performance.mark(`${metricName}:end`);
 
-    performance.measure(
-      metricName,
-      startMarker.name,
-      `${metricName}:end`
-    );
+    performance.measure(metricName, startMarker.name, `${metricName}:end`);
   }
 
   static measure(benchmarkName, callback) {
-    const metricName = `${CartPerformance.#metric_prefix}:${benchmarkName}`
+    const metricName = `${CartPerformance.#metric_prefix}:${benchmarkName}`;
     const startMarker = performance.mark(`${metricName}:start`);
 
     callback();
 
     const endMarker = performance.mark(`${metricName}:end`);
 
-    performance.measure(
-      metricName,
-      `${metricName}:start`,
-      `${metricName}:end`
-    );
+    performance.measure(metricName, `${metricName}:start`, `${metricName}:end`);
   }
 }

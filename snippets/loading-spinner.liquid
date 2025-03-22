@@ -7,6 +7,16 @@
   {% render 'loading-spinner' %}
 {% endcomment %}
 
-<div class="{% if class %}{{ class }}{% else %}loading__spinner hidden{% endif %}">
-  {{ 'loading-spinner.svg' | inline_asset_content }}
+{% comment %}
+  <div class="{% if class %}{{ class }}{% else %}loading__spinner hidden{% endif %}">
+    {{ 'loading-spinner.svg' | inline_asset_content }}
+  </div>
+{% endcomment %}
+
+<div
+  id="global-loading-spinner"
+  class="tw-fixed tw-inset-0 tw-bg-white tw-bg-opacity-75 tw-flex tw-items-center tw-justify-center tw-z-50 tw-hidden"
+>
+  <div class="tw-animate-spin tw-rounded-full tw-h-16 tw-w-16 tw-border-t-4 tw-border-b-4 tw-border-blue-500"></div>
+  {% comment %} Use your brand's primary color instead of blue-500 {% endcomment %}
 </div>
