@@ -1,12 +1,85 @@
 {% comment %} sections/product-recommendations.liquid {% endcomment %}
-<div class="tw-py-12">
-  <h2 class="tw-text-2xl tw-font-bold tw-text-center">You May Also Like</h2>
-  <p class="tw-text-center">Coming Soon...</p>
-</div>
+
+{% comment %} sections/product-recommendations.liquid {% endcomment %}
+
+{% if section.settings.title != blank or section.settings.recommendations != blank %}
+  <div class="tw-py-12 tw-{{ section.settings.color_scheme }}">
+    <div class="tw-container tw-mx-auto tw-px-4">
+      {% if section.settings.title != blank %}
+        <h2 class="tw-text-2xl tw-font-bold tw-mb-6">{{ section.settings.title | escape }}</h2>
+      {% endif %}
+
+      {% if section.settings.recommendations != blank and section.settings.recommendations.products.size > 0 %}
+        <div class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-4">
+          {% for product in section.settings.recommendations.products limit: section.settings.limit %}
+            {% comment %}Make sure it doesn't show current product{% endcomment %}
+            {% unless product.handle == template.handle %}
+              {% render 'product-card', product: product %}
+            {% endunless %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="tw-text-center">No recommendations available.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
 {% schema %}
 {
   "name": "Product Recommendations",
   "tag": "section",
-  "class": "product-recommendations"
+  "class": "product-recommendations",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "default": "You May Also Like",
+      "label": "Heading"
+    },
+    {
+      "type": "collection",
+      "id": "recommendations",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4,
+      "label": "Number of Products to Show"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1",
+      "options": [
+        {
+          "value": "scheme-1",
+          "label": "Scheme 1"
+        },
+        {
+          "value": "scheme-2",
+          "label": "Scheme 2"
+        },
+        {
+          "value": "scheme-3",
+          "label": "Scheme 3"
+        },
+        {
+          "value": "scheme-4",
+          "label": "Scheme 4"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Recommendations"
+    }
+  ]
 }
 {% endschema %}

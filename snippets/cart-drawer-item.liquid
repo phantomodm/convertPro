@@ -1,0 +1,121 @@
+{% comment %} snippets/cart-drawer-items.liquid {% endcomment %}
+
+{% comment %}
+  NOTE: Dawn's original file uses a custom element (<cart-items>).
+  We're removing that for simplicity and because we're primarily focused
+  on the cart *drawer*, which is already handled as a custom element
+  in cart-drawer.liquid.  We'll handle quantity updates via AJAX directly
+  in cart-drawer.js later.
+{% endcomment %}
+
+<div id="CartDrawer-CartItems" class="tw-drawer__contents">
+  {% if cart != empty %}
+    <form action="{{ routes.cart_url }}" id="CartDrawer-Form" class="tw-cart-drawer__form" method="post" novalidate>
+      <div id="CartDrawer-CartItemList">
+        {% for item in cart.items %}
+          <div
+            class="tw-cart-drawer__item tw-flex tw-py-6 tw-border-b tw-border-gray-300"
+            id="CartDrawerItem-{{ item.index | plus: 1 }}"
+          >
+            <div class="tw-cart-drawer__image-container tw-w-24 tw-h-24 tw-mr-4">
+              {% if item.image %}
+                <a href="{{ item.url }}" class="tw-cart-drawer__image-link">
+                  <img
+                    class="tw-cart-drawer__image tw-object-cover tw-object-center tw-w-full tw-h-full"
+                    src="{{ item.image | image_url: width: 300 }}"
+                    alt="{{ item.image.alt | escape }}"
+                    loading="lazy"
+                    width="150"
+                    height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                  >
+                </a>
+              {% endif %}
+            </div>
+
+            <div class="tw-cart-drawer__details tw-flex-grow">
+              <div class="tw-cart-drawer__item-header">
+                <a
+                  href="{{ item.url }}"
+                  class="tw-cart-drawer__item-title tw-text-base tw-font-medium tw-text-gray-900 tw-block"
+                >
+                  {{ item.product.title | escape }}
+                </a>
+                {% unless item.product.has_only_default_variant %}
+                  <div class="tw-cart-drawer__item-variant tw-text-sm tw-text-gray-600">
+                    {% for option in item.options_with_values %}
+                      <div>{{ option.name }}: {{ option.value }}</div>
+                    {% endfor %}
+                  </div>
+                {% endunless %}
+              </div>
+              <div class="tw-cart-drawer__item-quantity tw-flex tw-items-center tw-mt-2">
+                <label for="CartDrawerItem-{{ item.index | plus: 1 }}-quantity" class="tw-sr-only">Quantity</label>
+                <button
+                  type="button"
+                  class="tw-cart-drawer__quantity-btn tw-p-2 tw-text-gray-600 hover:tw-text-gray-900"
+                  aria-label="Decrease quantity"
+                  data-action="decrement"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  name="updates[]"
+                  value="{{ item.quantity }}"
+                  min="0"
+                  {% if item.variant.inventory_management == 'shopify'
+                    and item.variant.inventory_policy == 'deny'
+                    and item.variant.inventory_quantity > 0
+                  %}
+                    max="{{item.variant.inventory_quantity}}"
+                  {% endif %}
+                  class="tw-cart-drawer__quantity-input tw-w-16 tw-text-center tw-border tw-border-gray-300 tw-py-1 tw-px-2 tw-rounded-md"
+                  id="CartDrawerItem-{{ item.index | plus: 1 }}-quantity"
+                  data-index="{{ item.index | plus: 1 }}"
+                  aria-label="Quantity"
+                  inputmode="numeric"
+                  form="CartDrawer-Form"
+                >
+                <button
+                  type="button"
+                  class="tw-cart-drawer__quantity-btn tw-p-2 tw-text-gray-600 hover:tw-text-gray-900"
+                  aria-label="Increase quantity"
+                  data-action="increment"
+                >
+                  +
+                </button>
+              </div>
+              <div class="tw-cart-drawer__item-price tw-mt-2 tw-text-sm tw-text-gray-700">
+                {{ item.line_price | money }}
+                {% if item.original_line_price > item.line_price %}
+                  <span class="tw-sr-only">Sale price</span>
+                  <s class="tw-cart-drawer__original-price tw-text-gray-500">{{ item.original_line_price | money }}</s>
+                {% endif %}
+              </div>
+
+              <button
+                type="button"
+                class="tw-cart-drawer__remove tw-text-sm tw-text-gray-500 hover:tw-text-gray-700 tw-mt-1"
+                aria-label="Remove {{ item.product.title | escape }}"
+                data-index="{{ item.index | plus: 1 }}"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {% comment %} Subtotal and Checkout Button will be added in cart-drawer.liquid {% endcomment %}
+    </form>
+  {% else %}
+    <div class="tw-cart-drawer__empty-message tw-text-center tw-py-12">
+      <p class="tw-text-lg">{{ 'cart.general.empty' | t }}</p>
+      <a
+        href="{{ routes.all_products_collection_url }}"
+        class="tw-inline-block tw-px-6 tw-py-2 tw-mt-4 tw-border tw-border-gray-900 tw-text-gray-900 tw-rounded-md hover:tw-bg-gray-900 hover:tw-text-white"
+      >
+        {{ 'cart.general.continue_browsing' | t }}
+      </a>
+    </div>
+  {% endif %}
+</div>

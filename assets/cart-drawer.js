@@ -1,136 +1,266 @@
 class CartDrawer extends HTMLElement {
   constructor() {
     super();
+    this.drawer = this; // The cart drawer element itself.
+    this.cartItemsContainer = this.querySelector('#CartDrawer-CartItems'); // Container for cart items
+    this.subtotalElement = this.querySelector('.tw-cart-drawer__subtotal-amount'); // Subtotal display
+    this.checkoutButton = document.querySelector('[data-cart-checkout]');
 
-    this.addEventListener('keyup', (evt) => evt.code === 'Escape' && this.close());
-    this.querySelector('#CartDrawer-Overlay').addEventListener('click', this.close.bind(this));
-    this.setHeaderCartIconAccessibility();
+    // Event listeners for opening the drawer - MIGHT ALREADY BE HANDLED
+    this.setupOpenCloseHandlers();
+
+    // Event listener for updating quantities
+    this.cartItemsContainer.addEventListener('click', this.handleQuantityChange.bind(this));
+    // Event listener for remove items
+    this.cartItemsContainer.addEventListener('click', this.handleRemoveItem.bind(this));
+    //Prevent Checkout
+    if (this.checkoutButton) this.addCheckoutListener(); //Prevent default if needed.
   }
 
-  setHeaderCartIconAccessibility() {
-    const cartLink = document.querySelector('#cart-icon-bubble');
-    if (!cartLink) return;
+  setupOpenCloseHandlers() {
+    // Get all elements that should trigger opening the drawer
+    const openButtons = document.querySelectorAll('[data-drawer-toggle]');
 
-    cartLink.setAttribute('role', 'button');
-    cartLink.setAttribute('aria-haspopup', 'dialog');
-    cartLink.addEventListener('click', (event) => {
-      event.preventDefault();
-      this.open(cartLink);
-    });
-    cartLink.addEventListener('keydown', (event) => {
-      if (event.code.toUpperCase() === 'SPACE') {
+    //Add event listener to the cart and open drawer
+    const cartButton = document.querySelector('.header__icon--cart');
+    if (cartButton)
+      cartButton.addEventListener('click', (event) => {
         event.preventDefault();
-        this.open(cartLink);
-      }
-    });
-  }
+        this.openDrawer();
+      });
 
-  open(triggeredBy) {
-    if (triggeredBy) this.setActiveElement(triggeredBy);
-    const cartDrawerNote = this.querySelector('[id^="Details-"] summary');
-    if (cartDrawerNote && !cartDrawerNote.hasAttribute('role')) this.setSummaryAccessibility(cartDrawerNote);
-    // here the animation doesn't seem to always get triggered. A timeout seem to help
-    setTimeout(() => {
-      this.classList.add('animate', 'active');
+    openButtons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent default link behavior
+        this.openDrawer();
+      });
     });
 
-    this.addEventListener(
-      'transitionend',
-      () => {
-        const containerToTrapFocusOn = this.classList.contains('is-empty')
-          ? this.querySelector('.drawer__inner-empty')
-          : document.getElementById('CartDrawer');
-        const focusElement = this.querySelector('.drawer__inner') || this.querySelector('.drawer__close');
-        trapFocus(containerToTrapFocusOn, focusElement);
-      },
-      { once: true }
-    );
-
-    document.body.classList.add('overflow-hidden');
+    // Close drawer when clicking the overlay
+    const overlay = this.querySelector('.tw-drawer__overlay');
+    if (overlay) {
+      overlay.addEventListener('click', this.closeDrawer.bind(this));
+    }
+    // Close on close button
+    const closeButton = this.querySelector('[data-drawer-close]');
+    if (closeButton) {
+      closeButton.addEventListener('click', this.closeDrawer.bind(this));
+    }
   }
 
-  close() {
-    this.classList.remove('active');
-    removeTrapFocus(this.activeElement);
-    document.body.classList.remove('overflow-hidden');
+  openDrawer() {
+    this.drawer.classList.remove('tw-hidden'); // Make sure drawer is visible
+    document.body.classList.add('tw-overflow-hidden'); // Prevent body scrolling
+    this.drawer.classList.remove('-tw-translate-x-full');
+    this.drawer.classList.add('tw-translate-x-0');
+    this.drawer.setAttribute('aria-hidden', 'false'); // Update aria-hidden attribute
+
+    //Focus
+    const closeButton = this.querySelector('[data-drawer-close]');
+    if (closeButton) closeButton.focus();
+
+    // Trap focus within the drawer (accessibility)
+    this.trapFocus(this.drawer);
   }
 
-  setSummaryAccessibility(cartDrawerNote) {
-    cartDrawerNote.setAttribute('role', 'button');
-    cartDrawerNote.setAttribute('aria-expanded', 'false');
+  closeDrawer() {
+    this.drawer.classList.add('-tw-translate-x-full');
+    this.drawer.classList.remove('tw-translate-x-0');
+    this.body.classList.remove('tw-overflow-hidden');
+    // Update aria-hidden status
+    this.drawer.setAttribute('aria-hidden', 'true');
+    // Remove focus trap
+    this.removeTrapFocus();
+  }
 
-    if (cartDrawerNote.nextElementSibling.getAttribute('id')) {
-      cartDrawerNote.setAttribute('aria-controls', cartDrawerNote.nextElementSibling.id);
+  addCheckoutListener() {
+    this.checkoutButton.addEventListener('click', (e) => {
+      e.preventDefault(); //Prevent going to checkout.
+      window.location.href = this.checkoutButton.href; //Go to checkout.
+    });
+  }
+  handleQuantityChange(event) {
+    if (!event.target.classList.contains('tw-cart-drawer__quantity-btn')) {
+      return; // Ignore clicks on elements that aren't the quantity buttons
     }
 
-    cartDrawerNote.addEventListener('click', (event) => {
-      event.currentTarget.setAttribute('aria-expanded', !event.currentTarget.closest('details').hasAttribute('open'));
-    });
+    event.preventDefault();
+    const button = event.target;
+    const action = button.dataset.action;
+    const lineItemContainer = button.closest('.tw-cart-drawer__item');
+    const line = parseInt(lineItemContainer.querySelector('.tw-cart-drawer__quantity-input').dataset.index, 10);
+    const quantityInput = lineItemContainer.querySelector('.tw-cart-drawer__quantity-input');
+    let currentQuantity = parseInt(quantityInput.value, 10);
 
-    cartDrawerNote.parentElement.addEventListener('keyup', onKeyUpEscape);
+    if (action === 'increment') {
+      currentQuantity += 1;
+    } else if (action === 'decrement') {
+      currentQuantity = Math.max(0, currentQuantity - 1); // Allow going to 0 to remove item
+    }
+
+    // Update the quantity input field
+    quantityInput.value = currentQuantity;
+    // Call updateCart with correct line and quantity
+    this.updateCart(line, currentQuantity);
   }
 
-  renderContents(parsedState) {
-    this.querySelector('.drawer__inner').classList.contains('is-empty') &&
-      this.querySelector('.drawer__inner').classList.remove('is-empty');
-    this.productId = parsedState.id;
-    this.getSectionsToRender().forEach((section) => {
-      const sectionElement = section.selector
-        ? document.querySelector(section.selector)
-        : document.getElementById(section.id);
+  handleRemoveItem(event) {
+    if (!event.target.classList.contains('tw-cart-drawer__remove')) {
+      return;
+    }
 
-      if (!sectionElement) return;
-      sectionElement.innerHTML = this.getSectionInnerHTML(parsedState.sections[section.id], section.selector);
-    });
-
-    setTimeout(() => {
-      this.querySelector('#CartDrawer-Overlay').addEventListener('click', this.close.bind(this));
-      this.open();
-    });
+    event.preventDefault();
+    const removeButton = event.target;
+    const line = parseInt(removeButton.dataset.index, 10);
+    this.updateCart(line, 0); // Set quantity to 0 to remove
   }
+  updateCart(line, quantity) {
+    // Show loading state (optional, but good UX)
+    this.drawer.classList.add('tw-loading');
 
-  getSectionInnerHTML(html, selector = '.shopify-section') {
-    return new DOMParser().parseFromString(html, 'text/html').querySelector(selector).innerHTML;
+    const body = JSON.stringify({
+      line: line,
+      quantity: quantity,
+      sections: this.getSectionsToRender().map((section) => section.id), //Dawn
+      sections_url: window.location.pathname, //Dawn
+    });
+
+    window.theme
+      .fetch(
+        `${routes.cart_change_url}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, body },
+        'text'
+      )
+      .then((responseText) => {
+        const html = new DOMParser().parseFromString(responseText, 'text/html'); // Parse the HTML response
+        const cartDrawerItemsHTML = html.querySelector('#CartDrawer-CartItems').innerHTML; // Select the innerHTML.
+
+        // Update the cart items container with new HTML
+        this.cartItemsContainer.innerHTML = cartDrawerItemsHTML;
+        return window.theme.fetch(`${routes.cart_url}.js`); //Get updated cart
+      })
+      .then((cartData) => {
+        this.updateCartCount(cartData.item_count); // Update Cart Count in header
+        this.updateSubtotal(cartData.total_price); // Update Cart Subtotal
+      })
+      .catch((error) => {
+        console.error('Error updating cart:', error);
+        // Display an error message to the user.
+      })
+      .finally(() => {
+        this.drawer.classList.remove('tw-loading'); // Remove loading state
+      });
   }
 
   getSectionsToRender() {
+    //Dawn method
     return [
       {
         id: 'cart-drawer',
-        selector: '#CartDrawer',
+        selector: '.tw-drawer__container',
       },
       {
-        id: 'cart-icon-bubble',
+        id: 'cart-icon-bubble', //Dawn id
+        selector: '.cart-count-bubble', //Selecting
       },
     ];
   }
 
-  getSectionDOM(html, selector = '.shopify-section') {
-    return new DOMParser().parseFromString(html, 'text/html').querySelector(selector);
+  updateCartCount(count) {
+    const countElement = document.querySelector('.tw-cart-count');
+    if (countElement) {
+      countElement.textContent = count;
+      // Show/hide the bubble based on the count
+      const bubble = document.querySelector('.cart-count-bubble');
+      if (bubble) {
+        if (count > 0) {
+          bubble.classList.remove('tw-hidden');
+        } else {
+          bubble.classList.add('tw-hidden');
+        }
+      }
+    }
   }
 
-  setActiveElement(element) {
-    this.activeElement = element;
+  updateSubtotal(totalPrice) {
+    if (this.subtotalElement) this.subtotalElement.textContent = this.formatMoney(totalPrice);
   }
+
+  formatMoney(cents) {
+    //Helper Function
+    if (typeof cents === 'string') {
+      cents = cents.replace('.', '');
+    }
+    let value = '';
+    const placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
+    const formatString = window.moneyFormat || '${{amount}}'; // Fallback
+
+    function formatWithDelimiters(number, precision = 2, thousands = ',', decimal = '.') {
+      if (isNaN(number) || number == null) {
+        return 0;
+      }
+
+      number = (number / 100.0).toFixed(precision);
+
+      let parts = number.split('.');
+      const dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands);
+      const cents = parts[1] ? decimal + parts[1] : '';
+
+      return dollars + cents;
+    }
+
+    switch (formatString.match(placeholderRegex)[1]) {
+      case 'amount':
+        value = formatWithDelimiters(cents, 2);
+        break;
+      case 'amount_no_decimals':
+        value = formatWithDelimiters(cents, 0);
+        break;
+      case 'amount_with_comma_separator':
+        value = formatWithDelimiters(cents, 2, '.', ',');
+        break;
+      case 'amount_no_decimals_with_comma_separator':
+        value = formatWithDelimiters(cents, 0, '.', ',');
+        break;
+    }
+
+    return formatString.replace(placeholderRegex, value);
+  }
+
+  trapFocus(container) {
+    //Dawn's trap focus
+    var focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    var focusableContent = container.querySelectorAll(focusableElements);
+    var firstFocusableElement = focusableContent[0];
+    var lastFocusableElement = focusableContent[focusableContent.length - 1];
+    var KEYCODE_TAB = 9;
+
+    document.addEventListener('keydown', function (e) {
+      var isTabPressed = e.key === 'Tab' || e.keyCode === KEYCODE_TAB;
+
+      if (!isTabPressed) {
+        return;
+      }
+
+      if (e.shiftKey) {
+        /* shift + tab */ if (document.activeElement === firstFocusableElement) {
+          lastFocusableElement.focus();
+          e.preventDefault();
+        }
+      } /* tab */ else {
+        if (document.activeElement === lastFocusableElement) {
+          firstFocusableElement.focus();
+          e.preventDefault();
+        }
+      }
+    });
+  }
+  removeTrapFocus = () => {
+    //Dawn's remove trap focus
+    document.removeEventListener('keydown', {});
+  };
 }
 
-customElements.define('cart-drawer', CartDrawer);
-
-class CartDrawerItems extends CartItems {
-  getSectionsToRender() {
-    return [
-      {
-        id: 'CartDrawer',
-        section: 'cart-drawer',
-        selector: '.drawer__inner',
-      },
-      {
-        id: 'cart-icon-bubble',
-        section: 'cart-icon-bubble',
-        selector: '.shopify-section',
-      },
-    ];
-  }
+if (!customElements.get('cart-drawer')) {
+  customElements.define('cart-drawer', CartDrawer);
 }
-
-customElements.define('cart-drawer-items', CartDrawerItems);

@@ -1,0 +1,36 @@
+{% comment %} templates/search.liquid {% endcomment %}
+<div class="tw-container tw-mx-auto tw-py-8">
+  <h1 class="tw-text-3xl tw-font-bold tw-mb-4">Search Results for "{{ search.terms | escape }}"</h1>
+
+  {% if search.performed %}
+    {% if search.results.size > 0 %}
+      <div class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-4">
+        {% for item in search.results %}
+          {% if item.object_type == 'product' %}
+            {% render 'product-card', product: item %}
+          {% elsif item.object_type == 'article' %}
+            {% comment %} Add code to display articles (blog posts) {% endcomment %}
+            <div class="tw-mb-4">
+              <h2 class="tw-text-xl tw-font-semibold">
+                <a href="{{ item.url }}">{{ item.title | escape }}</a>
+              </h2>
+              <p>{{ item.content | strip_html | truncatewords: 20 }}</p>
+            </div>
+          {% elsif item.object_type == 'page' %}
+            {% comment %} Add code to display pages {% endcomment %}
+            <div class="tw-mb-4">
+              <h2 class="tw-text-xl tw-font-semibold">
+                <a href="{{ item.url }}">{{ item.title | escape }}</a>
+              </h2>
+              <p>{{ item.content | strip_html | truncatewords: 20 }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No results found for "{{ search.terms | escape }}".</p>
+    {% endif %}
+  {% else %}
+    <p>Enter a search term to see results.</p>
+  {% endif %}
+</div>

@@ -102,6 +102,7 @@
           {{ 'products.product.sold_out' | t }}
         {% endif %}
       </button>
+      {% render 'product-trust-badges' %}
 
       <div class="tw-mt-4 tw-prose tw-prose-sm">
         {{ product.description }}

@@ -103,6 +103,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+document.addEventListener('click', (event) => {
+  const drawer = document.querySelector('[data-drawer]');
+  const isInsideDrawer = drawer.contains(event.target); //Checks if the click is within the element
+  const isToggleButton = event.target.closest('[data-drawer-toggle]'); // Check if click is on the toggle
+  if (!isInsideDrawer && !isToggleButton && drawer.classList.contains('tw-translate-x-0')) {
+    // Assuming you have a way to close the drawer. Adapt this to your actual close function
+    const mobileNavInstance = document.querySelector('mobile-nav'); // Or however you access it
+    if (mobileNavInstance) {
+      mobileNavInstance.closeDrawer(); // Call a method
+    }
+  }
+});
+
 // Add a function to centralize fetch calls
 window.theme = window.theme || {}; //Namespace
 window.theme.fetch = async function shopifyFetch(url, options, parse = 'json') {

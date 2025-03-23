@@ -40,9 +40,21 @@
       "reset": "Clear search term"
     },
     "cart": {
-      "view": "View cart ({{ count }})",
-      "view_empty_cart": "View cart",
-      "item_added": "Item added to your cart"
+      "general": {
+        "title": "Your Cart",
+        "empty": "Your cart is empty",
+        "continue_browsing": "Continue Browsing",
+        "subtotal": "Subtotal",
+        "checkout": "Checkout",
+        "close": "Close",
+        "view": "View cart ({{ count }})",
+        "view_empty_cart": "View cart",
+        "item_added": "Item added to your cart"
+      },
+      "item": {
+        "quantity": "Quantity",
+        "remove": "Remove"
+      }
     },
     "share": {
       "close": "Close share",
@@ -276,7 +288,6 @@
       "announcement": "Announcement",
       "announcement_bar": "Announcement bar"
     },
-
     "header": {
       "announcement": "Announcement",
       "menu": "Menu",
